@@ -6,7 +6,6 @@ import { Map } from "../dependency/map";
 /** @param {World} world  */
 export function InputSystem(world) {
 	world.listen("onInput", ({key}) => {
-		console.log("onInput", key);
 		(KeyMap[key] ?? (() => {}))(world)
 	})
 }
@@ -22,7 +21,6 @@ const movePlayer = (dx, dy) => (world) => {
 	for (const [position, _] of world.query(PositionComponent, PlayerComponent)) {
 		const newX = position.x + dx;
 		const newY = position.y + dy;
-		console.log(`Moved to ${newX} ${newY}`);
 
 		if (map.isBlocked(newX, newY))
 			continue;

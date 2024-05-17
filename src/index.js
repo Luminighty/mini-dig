@@ -1,7 +1,6 @@
-import { AsciiRenderer, createAsciiRenderer, glyph } from "./ascii";
+import { createAsciiRenderer } from "./ascii";
 import { GameConfig } from "./dependency/config";
 import { setupEcs } from "./ecs";
-import { BLACK, GRAY, GREEN, ORANGE, RED, WHITE } from "./palette";
 import bitmapUrl from "./pastiche_8x8.png"
 
 const config = new GameConfig();
