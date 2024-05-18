@@ -4,6 +4,7 @@ import { PositionComponent } from "../component/Position.component";
 import { RenderableComponent } from "../component/Renderable.component";
 import { AsciiRenderer } from "../ascii";
 import { GameConfig } from "../dependency/config";
+import { BLACK, GRAY } from "../palette";
 
 /**
  * @param {World} world 
@@ -18,7 +19,15 @@ export function RenderSystem(world) {
 		for (let i = 0; i < map.tiles.length; i++) {
 			const x = i % config.world.x
 			const y = Math.floor(i / config.world.x)
-			renderer.set(x, y, TILE_GLYPH[map.tiles[i]]);
+
+			if (!map.isTileDiscovered(x, y))
+				continue
+
+			const glyph = TILE_GLYPH[map.tiles[i]];
+			const fg = map.isTileVisible(x, y) ? glyph.fg : GRAY(0x30)
+			const bg = map.isTileVisible(x, y) ? glyph.bg : BLACK
+
+			renderer.set(x, y, {c: glyph.c, fg, bg});
 		}
 
 		for (const [position, renderable] of world.query(PositionComponent, RenderableComponent)) {

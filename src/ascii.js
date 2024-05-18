@@ -3,6 +3,10 @@ export function glyph(char, fg, bg) {
 	return { c: char.charCodeAt(0), fg, bg }
 }
 
+export function glyphCode(code, fg, bg) {
+	return { c: code, fg, bg }
+}
+
 
 /**
  * 

@@ -1,16 +1,18 @@
-import { glyph } from "../ascii"
-import { BLACK, GRAY, GREEN } from "../palette"
+import { glyph, glyphCode } from "../ascii"
+import { BLACK, GRAY, GREEN, PURPLE } from "../palette"
 import { Random } from "../utils/random"
 import { Rect } from "../utils/rect"
 
 export const TILE = {
 	FLOOR: 0,
 	WALL: 1,
+	BEDROCK: 2
 }
 
 export const TILE_GLYPH = {
-	[TILE.FLOOR]: glyph('.', GRAY(0x40), BLACK),
+	[TILE.FLOOR]: glyph('.', GRAY(0x80), BLACK),
 	[TILE.WALL]: glyph('#', GREEN, BLACK),
+	[TILE.BEDROCK]: glyphCode(0xDB, GRAY(0x40), BLACK),
 }
 
 export class Map {
@@ -18,8 +20,33 @@ export class Map {
 		this.width = width
 		this.height = height
 		this.tiles = Array(width * height).fill(TILE.WALL)
+		this.visibleTiles = new Set()
+		this.discoveredTiles = new Set()
 		/** @type {Rect[]} */
 		this.rooms = []
+		this.target = null
+	}
+
+	/** @param {Set} tiles  */
+	setVisibleTiles(tiles) {
+
+		this.visibleTiles.clear()
+		for (const tile of tiles.values()) {
+			this.visibleTiles.add(tile);
+			this.discoveredTiles.add(tile)	
+		}
+	}
+
+	isTileVisible(x, y) {
+		return this.visibleTiles.has(`${x};${y}`)
+	}
+	
+	isTileDiscovered(x, y) {
+		return this.discoveredTiles.has(`${x};${y}`)
+	}
+
+	isTileOpaque(x, y) {
+		return [TILE.WALL, TILE.BEDROCK].includes(this.tiles[this.xyIndex(x, y)])
 	}
 
 	xyIndex(x, y) {
@@ -27,7 +54,7 @@ export class Map {
 	}
 
 	isBlocked(x, y) {
-		return this.tiles[this.xyIndex(x, y)] == TILE.WALL
+		return [TILE.WALL, TILE.BEDROCK].includes(this.tiles[this.xyIndex(x, y)])
 	}
 }
 
@@ -89,6 +116,15 @@ export function generateMap(width, height) {
 		}
 		addRoom(map, newRoom);
 		map.rooms.push(newRoom)
+	}
+
+	for (let x = 0; x < width; x++) {
+		map.tiles[map.xyIndex(x, 0)] = TILE.BEDROCK;
+		map.tiles[map.xyIndex(x, height - 1)] = TILE.BEDROCK;
+	}
+	for (let y = 0; y < height; y++) {
+		map.tiles[map.xyIndex(0, y)] = TILE.BEDROCK;
+		map.tiles[map.xyIndex(width - 1, y)] = TILE.BEDROCK;
 	}
 	return map
 }

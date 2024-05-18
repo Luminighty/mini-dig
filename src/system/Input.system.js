@@ -1,7 +1,8 @@
 import { World } from "@luminight/ecs";
 import { PlayerComponent } from "../component/Player.component";
 import { PositionComponent } from "../component/Position.component";
-import { Map } from "../dependency/map";
+import { Map, TILE } from "../dependency/map";
+import { ViewshedComponent } from "../component/Viewshed.component";
 
 /** @param {World} world  */
 export function InputSystem(world) {
@@ -22,13 +23,27 @@ const movePlayer = (dx, dy) => (world) => {
 		const newX = position.x + dx;
 		const newY = position.y + dy;
 
-		if (map.isBlocked(newX, newY))
+		if (map.isBlocked(newX, newY)) {
+
+			if (map.target?.x == newX && map.target?.y == newY) {
+				const idx = map.xyIndex(newX, newY)
+				if (map.tiles[idx] == TILE.WALL)
+					map.tiles[idx] = TILE.FLOOR
+			} else {
+				map.target = {x: newX, y: newY}
+			}
+
 			continue;
+		}
 
 		position.x = newX;
 		position.y = newY;
+		const viewshed = world.getEntity(position.parent).getComponent(ViewshedComponent)
+		if (viewshed)
+			viewshed.isDirty = true;
 	}
 
+	world.emit("onUpdate");
 	world.emit("onRender");
 }
 
