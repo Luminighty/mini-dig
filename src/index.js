@@ -20,6 +20,7 @@ function resize() {
 window.addEventListener("resize", resize)
 resize()
 
+console.log("index");
 
 createAsciiRenderer(bitmapUrl,
 	canvas.getContext("2d"),
@@ -31,7 +32,17 @@ createAsciiRenderer(bitmapUrl,
 	const ecs = setupEcs(renderer, config)
 
 	window.addEventListener("keydown", (e) => {
-		ecs.emit("onInput", {key: e.key})
+		ecs.emit("onInputDown", {key: e.key})
 	})
+
+	window.addEventListener("keyup", (e) => {
+		ecs.emit("onInputUp", {key: e.key})
+	})
+
+	setInterval(() => {
+		ecs.emit("onUpdate")
+		ecs.emit("onRender")
+		ecs.maintain()
+	}, 100)
 
 })

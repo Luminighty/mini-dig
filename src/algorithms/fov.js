@@ -8,6 +8,7 @@
  * @param {(fromX, fromY, toX, toY) => number} distanceFn
  */
 export function fieldOfVision2D(x, y, isOpaque, distance) {
+	console.log("fieldOfVision2D");
 
 	const visibleFields = new Set()
 	const setVisible = (x, y) => visibleFields.add(`${x};${y}`)
@@ -72,7 +73,6 @@ export function fieldOfVision2D(x, y, isOpaque, distance) {
 				break;
 		}
 	}
-
 	return visibleFields
 }
 

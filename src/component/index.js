@@ -1,5 +1,4 @@
 export { ComponentRegistry } from "./registry";
 
-export { PlayerComponent } from "./Player.component";
-export { PositionComponent } from "./Position.component";
-export { RenderableComponent } from "./Renderable.component";
+export * from "./common.component";
+export * from "./explosion.component"

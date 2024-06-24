@@ -1,29 +1,29 @@
-import { World } from "@luminight/ecs";
-import { ViewshedComponent } from "../component/Viewshed.component";
-import { PositionComponent } from "../component";
+import { Entities, World } from "@luminight/ecs";
 import { fieldOfVision2D } from "../algorithms/fov";
 import { Map } from "../dependency/map";
 import { PlayerEntity } from "../dependency/player";
+import { Position, Viewshed } from "../component";
 
 /** @param {World} world */
 export function ViewshedSystem(world) {
 	const map = world.getDependency(Map)
 	const player = world.getDependency(PlayerEntity)
+	console.log(world);
 
 	world.listen("onUpdate", () => {
 
-		for (const [viewshed, position] of world.query(ViewshedComponent, PositionComponent)) {
+		for (const [entity, viewshed, position] of world.query(Entities, Viewshed, Position)) {
 			if (!viewshed.isDirty)
 				continue
 
 			viewshed.tiles = fieldOfVision2D(
 				position.x, position.y,
 				(x, y) => map.isTileOpaque(x, y),
-				8,
+				viewshed.range,
 			)
 			viewshed.isDirty = false
 
-			if (viewshed.parent == player.entity.uuid) {
+			if (entity == player.entity) {
 				map.setVisibleTiles(viewshed.tiles)
 			}
 		}

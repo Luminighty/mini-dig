@@ -1,8 +1,30 @@
+/**
+ * @typedef {[number, number, number]} RGB
+ */
 
+/**
+ * @typedef {Object} Glyph
+ * @property {number} char 
+ * @property {RGB} fg 
+ * @property {RGB} bg 
+ */
+
+/** 
+ * @param {string} char 
+ * @param {RGB} fg
+ * @param {RGB} bg 
+ * @returns {Glyph} 
+ */
 export function glyph(char, fg, bg) {
 	return { c: char.charCodeAt(0), fg, bg }
 }
 
+/** 
+ * @param {number} code
+ * @param {RGB} fg
+ * @param {RGB} bg 
+ * @returns {Glyph} 
+ */
 export function glyphCode(code, fg, bg) {
 	return { c: code, fg, bg }
 }

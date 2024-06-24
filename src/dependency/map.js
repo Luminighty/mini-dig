@@ -25,6 +25,7 @@ export class Map {
 		/** @type {Rect[]} */
 		this.rooms = []
 		this.target = null
+		this.tileEntities = Array(width * height).fill([])
 	}
 
 	/** @param {Set} tiles  */
@@ -49,6 +50,7 @@ export class Map {
 		return [TILE.WALL, TILE.BEDROCK].includes(this.tiles[this.xyIndex(x, y)])
 	}
 
+	/** @returns {number} */
 	xyIndex(x, y) {
 		return x + (y * this.width)
 	}

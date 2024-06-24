@@ -1,10 +1,15 @@
 const componentModules = import.meta.glob("./**/*.component.js", { eager: true })
 
+const exclude = []
+
 export const ComponentRegistry = []
 
 for (const path in componentModules) {
 	const mod = await componentModules[path]
-	const componentKey = Object.keys(mod).filter((component) => component.endsWith("Component"))[0]
-	const component = mod[componentKey]
-	ComponentRegistry.push([componentKey, component])
+	for (const key of Object.keys(mod)) {
+		const component = mod[key]
+		if (exclude.includes(component) || typeof(component) !== "function")
+			continue
+		ComponentRegistry.push([key, component])
+	}
 }

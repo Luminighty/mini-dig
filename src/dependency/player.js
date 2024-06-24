@@ -1,7 +1,7 @@
-import { Entity } from "@luminight/ecs";
+import { EntityId } from "@luminight/ecs";
 
 export class PlayerEntity {
-	/** @param {Entity} entity  */
+	/** @param {EntityId} entity  */
 	constructor(entity) {
 		this.entity = entity
 	}
