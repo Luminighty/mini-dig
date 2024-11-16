@@ -3,21 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "workspaces": [
-    "client",
-    "server",
-    "shared"
-  ],
   "scripts": {
-    "dev": "concurrently \"npm --prefix client run dev\" \"npm --prefix server run dev\"",
-    "build": "npm --prefix client run build && npm --prefix server run build",
-    "start": "npm --prefix server run start",
+    "dev": "vite",
+    "build": "vite build",
+    "start": "node ./build/server.js",
     "lint": "eslint"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@luminight/ecs": "^1.0.3"
+    "express": "^5.0.1",
+    "@luminight/ecs": "^1.0.3",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
@@ -25,7 +22,7 @@
     "eslint-plugin-jsdoc": "^50.5.0",
     "globals": "^15.12.0",
     "vite": "^5.2.11",
-    "concurrently": "^9.1.0"
+    "vite-plugin-node": "^4.0.0"
   },
   "type": "module",
   "engines": {
