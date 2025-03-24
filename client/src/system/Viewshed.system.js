@@ -1,8 +1,8 @@
 import { Entities, World } from "@luminight/ecs"
-import { fieldOfVision2D } from "../../../shared/algorithms/fov"
-import { Map } from "../../../shared/dependency/map"
+import { fieldOfVision2D } from "@shared/algorithms"
+import { Map } from "@shared/dependency"
 import { PlayerEntity } from "../dependency/player"
-import { Position, Viewshed } from "../../../shared/component"
+import { Position, Viewshed } from "@shared/component"
 
 /** @param {World} world */
 export function ViewshedSystem(world) {

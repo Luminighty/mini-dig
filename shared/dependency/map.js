@@ -16,6 +16,23 @@ export class Map {
 		this.tileEntities = Array(width * height).fill([])
 	}
 
+	/** @param {Map} map */
+	static deserialize(map, data) {
+		if (!data)
+			return console.warn("Tried to deserialize Map, but no data was present!")
+		map.width = data.width
+		map.height = data.height
+		map.tiles = data.tiles
+	}
+
+	serialize() {
+		return {
+			width: this.width,
+			height: this.height,
+			tiles: this.tiles
+		}
+	}
+
 	/** @param {Set} tiles  */
 	setVisibleTiles(tiles) {
 		this.visibleTiles.clear()

@@ -1,6 +1,6 @@
 import { glyph, glyphCode } from "../../client/src/ascii"
-import { GRAY, BLACK, BROWN, DARK_BROWN, RED, BLUE } from "../../client/src/palette"
-import { OreTemplates } from "../templates/ores"
+import { GRAY, BLACK, BROWN, DARK_BROWN, RED, BLUE } from "@shared/utils"
+import { createCoalOre, createDiamondOre, createIronOre } from "../templates/ores"
 
 export const TILE = {
 	FLOOR: 0,
@@ -23,9 +23,9 @@ export const TILE_GLYPH = {
 }
 
 export const ORE_DROP = {
-	[TILE.COAL]: OreTemplates.coal,
-	[TILE.IRON]: OreTemplates.iron,
-	[TILE.DIAMOND]: OreTemplates.diamond,
+	[TILE.COAL]: createCoalOre,
+	[TILE.IRON]: createIronOre,
+	[TILE.DIAMOND]: createDiamondOre,
 }
 
 export const TILE_DIGGABLE = [TILE.STONE, TILE.IRON, TILE.COAL, TILE.DIAMOND, TILE.DIRT]

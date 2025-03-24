@@ -5,7 +5,8 @@ export const Key = {
 	DOWN: "DOWN",
 	JUMP: "JUMP",
 	LADDER: "LADDER",
-	EXPLOSIVE: "EXPLOSIVE"
+	EXPLOSIVE: "EXPLOSIVE",
+	PICKUP: "PICKUP"
 }
 
 export const InputMap = {
@@ -13,6 +14,7 @@ export const InputMap = {
 	'ArrowLeft': Key.LEFT,
 	'ArrowRight': Key.RIGHT,
 	'ArrowDown': Key.DOWN,
+	'Enter': Key.PICKUP,
 	'x': Key.JUMP,
 	'c': Key.LADDER,
 	'v': Key.EXPLOSIVE

@@ -1,10 +1,10 @@
 import { World } from "@luminight/ecs"
 import { Socket, io } from "socket.io-client"
-import { ClientOwned } from "@shared/component/network.component"
+import { ClientOwned, NetworkEntity } from "@shared/component/network.component"
 import { SharedComponentRegistry } from "@shared/component"
-import { id } from "../../../shared/utils/id"
-import { NETWORK_TEMPLATES } from "../../../shared/templates/network"
-import { ServerOwned } from "../../../shared/component/network.component"
+import { createEntityFromData, id } from "@shared/utils"
+import { NETWORK_TEMPLATES } from "@shared/templates/network"
+import { ServerOwned } from "@shared/component"
 
 export class NetworkSocket {
 	/** 
@@ -16,32 +16,64 @@ export class NetworkSocket {
 		this.world = world
 		this.socket = socket
 		this.clientId = clientId
+		this.networkEntities = {}
 		this.serverEntities = {}
 		/** @type {{entity: import("@luminight/ecs").EntityId, clientOwned: ClientOwned}[]} */
 		this.clientEntities = []
 		attachListeners(socket, world, this)
 	}
 
-	emit(event, props={}) {
+	emit(event, props={}, emitLocally=true) {
+		if (props.entity)
+			props.networkEntity = this.networkEntities[props.entity]
 		props["client"] = this.clientId
 		this.socket.emit("emit", event, props)
+		if (emitLocally)
+			this.world.emit(event, props)
+	}
+
+	networkToLocalEntity(networkId) {
+		for (const [entity, network] of this.networkEntities)
+			if (network == networkId)
+				return entity
+		return null
 	}
 
 	/** 
+	 * Creates an entity owned by the client
 	 * @param {import("@luminight/ecs").EntityId} entity 
 	 * @param {ClientOwned} clientOwned
 	 */
-	createEntity(entity, clientOwned) {
+	createClientEntity(entity, clientOwned) {
 		clientOwned.id = id()
 		this.clientEntities.push({entity, clientOwned})
-		this.socket.emit("createEntity", clientOwned.templateId, clientOwned.id, getEntityData(this.world, entity, clientOwned))
+		this.socket.emit(
+			"createClientEntity", 
+			clientOwned.templateId, 
+			clientOwned.id, 
+			clientOwned.keepAlive, 
+			getEntityData(this.world, entity, clientOwned)
+		)
+	}
+
+	/** 
+	 * Creates an entity shared on the network, not owned by anyone
+	 * @param {Function} template 
+	 */
+	createEntity(template, ...data) {
+		const entity = template(this.world, ...data)
+		const network = this.world.addComponent(entity, new NetworkEntity())
+		this.socket.emit("createEntity", template.name, data, ({networkId}) => {
+			network.id = networkId
+			this.networkEntities[entity] = networkId
+		})
 	}
 
 
 	syncAll() {
 		const data = []
 		for (const entity of this.clientEntities)
-			data.push([entity.entity, getEntityData(this.world, entity.entity, entity.clientOwned)])
+			data.push([entity.clientOwned.id, getEntityData(this.world, entity.entity, entity.clientOwned)])
 		this.socket.emit("syncAll", data)
 	}
 
@@ -55,11 +87,31 @@ export class NetworkSocket {
 	}
 
 	setup(serverData) {
-		for (const entity of serverData) {
-			if (!this.serverEntities[entity.owner])
-				this.serverEntities[entity.owner] = {}
-			const e = initServerEntity(this, this.world, entity.owner, entity.id, entity.template, entity.data)
-			this.serverEntities[entity.owner][entity.id] = e
+		console.log("setup", serverData)
+		
+		for (const data of serverData.world) {
+			const entity = createEntityFromData(this.world, data, SharedComponentRegistry)
+			if (!entity) {
+				console.warn(`Failed to initialize entity`, entity)
+				continue
+			}
+			const serverOwned = this.world.getComponent(entity, ServerOwned)
+			if (serverOwned) {
+				const owner = serverOwned.owner
+				const id = serverOwned.id
+				if (!this.serverEntities[owner])
+					this.serverEntities[owner] = {}
+				
+				const networkData = {}
+				for (const [id, componentData] of Object.entries(data.components)) {
+					const [_, Component] = SharedComponentRegistry.find(([key]) => key == id)
+					const c = this.world.getComponent(entity, Component)
+					networkData[id] = c
+					for (const [field, value] of Object.entries(componentData))
+						c[field] = value
+				}
+				this.serverEntities[owner][id] = networkData
+			}
 		}
 	}
 }
@@ -78,7 +130,11 @@ function getEntityData(world, entity, client) {
  * @param {NetworkSocket} network 
  */
 function attachListeners(socket, world, network) {
-	socket.on("emit", (event, props) => world.emit(event, props))
+	socket.on("emit", (event, props) => {
+		if (props.networkEntity)
+			props.entity = network.networkToLocalEntity(props.networkEntity)
+		world.emit(event, props)
+	})
 
 	socket.on("sync", (template, owner, id, data) => {
 		let entityData = network.serverEntities[owner]?.[id]
@@ -88,7 +144,6 @@ function attachListeners(socket, world, network) {
 				network.serverEntities[owner] = {}
 			network.serverEntities[owner][id] = entityData
 		}
-		console.log(entityData);
 		
 		for (const [componentId, componentData] of Object.entries(data)) {
 			const c = entityData[componentId]
@@ -102,24 +157,33 @@ function attachListeners(socket, world, network) {
 			network.serverEntities[owner] = {}
 		for (const [id, entityData] of data) {
 			const c = network.serverEntities[owner][id]
-			if (!c)
+			if (!c) {
+				console.log("Missing entity!", owner, id, entityData)
 				continue
-				
+			}
 			
-			for (const [componentId, componentData] of Object.entries(entityData))
+			for (const [componentId, componentData] of Object.entries(entityData)) {
+				console.log(componentData)
 				for (const [field, value] of componentData)
 					c[componentId][field] = value
-			
+			}
 		}
 	})
 
-	socket.on("createEntity", (template, owner, id, data) => {
-		console.log(template, owner, id, data);
+	socket.on("createServerEntity", (template, owner, id, data) => {
+		console.log(template, owner, id, data)
 		if (!network.serverEntities[owner])
 			network.serverEntities[owner] = {}
 
 		network.serverEntities[owner][id] = initServerEntity(network, world, owner, id, template, data)
+	})
 
+	socket.on("createEntity", (template, data, networkId) => {
+		const Template = NETWORK_TEMPLATES[template]
+		if (!Template)
+			throw new Error(`Template '${template} not found when initializing network entity ${id}`)
+		const entity = Template(world, ...data)
+		world.addComponent(entity, new NetworkEntity(networkId))
 	})
 }
 
@@ -152,7 +216,7 @@ function initServerEntity(network, world, owner, id, template, data) {
 
 /** @returns {Promise<[Socket, number, Object]>} */
 export async function connectToServer(url) {
-	return new Promise((res, rej) => {
+	return new Promise((res) => {
 		console.log("Connecting...")
 		const socket = io(url)
 		

@@ -1,6 +1,8 @@
 export class Position {
-	constructor({x, y}) {
+	constructor({x, y} = {}) {
+		/** @type {number} */
 		this.x = x ?? 0
+		/** @type {number} */
 		this.y = y ?? 0
 	}
 }
@@ -17,6 +19,26 @@ export class Viewshed {
 
 	constructor(range) {
 		this.range = range
+	}
+}
+
+export class Item {
+	constructor({name, weight} = {}) {
+		/** @type {number} */
+		this.name = name ?? "Unknown"
+		/** @type {number} */
+		this.weight = weight ?? 1
+	}
+
+	/** @param {Item} other  */
+	equals(other) {
+		return this.name == other.name && this.weight == other.weight
+	}
+}
+
+export class Placeable {
+	constructor(template) {
+		this.template = template
 	}
 }
 

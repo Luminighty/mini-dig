@@ -25,6 +25,7 @@ setInterval(() => {
 	const dt = now - lastTime
 	lastTime = now
 	world.emit("onUpdate", {dt})
+	world.maintain()
 }, 16)
 
 server.listen(PORT, () => console.log(`Listening on http://localhost:${PORT}`))

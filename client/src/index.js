@@ -1,10 +1,10 @@
 import { World } from "@luminight/ecs"
 import { createAsciiRenderer } from "./ascii"
-import { GameConfig } from "@shared/dependency/config"
+import { GameConfig, Map } from "@shared/dependency"
 import { setupEcs } from "./ecs"
 import bitmapUrl from "./pastiche_8x8.png"
-import { Input } from "@shared/dependency"
 import { connectToServer, NetworkSocket } from "./dependency/network"
+import { Input } from "./dependency/input"
 
 const config = new GameConfig()
 
@@ -40,6 +40,8 @@ Promise.all([networkPromise, asciiRendererPromise])
 
 	input = ecs.getDependency(Input)
 	ecs.getDependency(NetworkSocket).setup(serverData)
+	Map.deserialize(ecs.getDependency(Map), serverData.map)
+
 	window.addEventListener("keydown", (e) => {
 		if (!e.repeat) {
 			input.press(e.key)

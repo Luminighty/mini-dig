@@ -16,4 +16,9 @@ export class Timer {
 	reset() {
 		this.current = this.time
 	}
+
+	start(time) {
+		this.time = time
+		this.current = time
+	}
 }

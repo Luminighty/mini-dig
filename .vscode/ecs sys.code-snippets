@@ -1,0 +1,13 @@
+{
+	"ECS System": {
+		"scope": "javascript, typescript",
+		"prefix": "ecs:sys",
+		"body": [
+			"/** @param {${1:World}} world  */",
+			"export function $2System(world) {",
+			"\t$0",
+			"}",
+			""
+		]
+	}
+}

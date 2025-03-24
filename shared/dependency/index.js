@@ -1,5 +1,3 @@
-export { Camera } from "../../client/src/dependency/camera"
-export { GameConfig } from "./config"
-export { Map, generateMap, generateMine } from "./map"
-export { PlayerEntity } from "../../client/src/dependency/player"
-export { Input } from "../../client/src/dependency/input"
+export * from "./config"
+export * from "./map"
+export * from "./tile"

@@ -3,7 +3,7 @@ import { createExplosion, explosionGlyph } from "../templates"
 import { Map as GameMap } from "../dependency/map"
 import { Explosion, Explosive, Position, Renderable } from "../component"
 import { Random } from "../utils/random"
-import { ORANGE, RED, YELLOW } from "../../client/src/palette"
+import { ORANGE, RED, YELLOW } from "@shared/utils"
 import { TILE } from "../dependency/tile"
 
 

@@ -1,17 +1,23 @@
 import { Entity, World } from "@luminight/ecs"
 import { glyph, glyphCode } from "../../client/src/ascii"
-import { BLACK, BROWN, GRAY, ORANGE, RED, YELLOW } from "../../client/src/palette"
-import { Explosion, Explosive, Gravity, Ladder, Position, RenderOrder, Renderable, Viewshed } from "../component"
+import { Explosion, Explosive, Gravity, Item, Ladder, Position, RenderOrder, Renderable, ServerOwned, Viewshed } from "@shared/component"
 import { Random } from "../utils"
-import { ServerOwned } from "../component/network.component"
+import { BLACK, BROWN, GRAY, ORANGE, RED, YELLOW } from "@shared/utils"
 
+export * from "./ores"
 
-/** @param {World} */
-export const createLadder = (world, x, y) =>
+/** @param {World} world */
+export const createLadder = (world, x, y) => {
+	const ladder = createLadderItem(world)
+	world.addComponent(ladder, new Position({x, y}))
+	return ladder
+}
+
+export const createLadderItem = (world) =>
 	world.createEntity(
-		new Position({x, y}),
 		new Renderable(glyph("|", BROWN, BLACK), RenderOrder.ITEM),
-		new Ladder()
+		new Ladder(),
+		new Item({name: "LADDER"})
 	)
 
 /** 
@@ -36,7 +42,7 @@ export const createExplosion = (world, x, y, radius) =>
 	world.createEntity(
 		new Explosion(radius),
 		new Position({x, y}),
-		new Renderable(explosionGlyph(radius + Random.range(-1, 2)), RenderOrder.EXPLOSION + 10 + radius)
+		new Renderable(explosionGlyph(radius), RenderOrder.EXPLOSION + 10 + radius)
 	)
 
 export const explosionGlyph = (radius) => {
